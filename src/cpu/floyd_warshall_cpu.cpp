@@ -2,26 +2,28 @@
 #include <vector>
 #include <limits>
 
-const int INF = std::numeric_limits<int>::max();
+using namespace std;
+
+const int INF = numeric_limits<int>::max();
 
 // Function to print the shortest distance matrix
-void printMatrix(const std::vector< std::vector<int> >& dist) {
+void printMatrix(const vector< vector<int> >& dist) {
     int V = dist.size();
     for (int i = 0; i < V; ++i) {
         for (int j = 0; j < V; ++j) {
             if (dist[i][j] == INF)
-                std::cout << "INF ";
+                cout << "INF ";
             else
-                std::cout << dist[i][j] << " ";
+                cout << dist[i][j] << " ";
         }
-        std::cout << std::endl;
+        cout << endl;
     }
 }
 
 // Floyd-Warshall algorithm
-void floydWarshall(std::vector< std::vector<int> >& graph) {
+void floydWarshall(vector< vector<int> >& graph) {
     int V = graph.size();
-    std::vector< std::vector<int> > dist = graph;
+    vector< vector<int> > dist = graph;
 
     for (int k = 0; k < V; ++k) {
         for (int i = 0; i < V; ++i) {
@@ -38,7 +40,7 @@ void floydWarshall(std::vector< std::vector<int> >& graph) {
 
 int main() {
     const int V = 4;    
-    std::vector< std::vector<int> > graph(V, std::vector<int>(V, INF));
+    vector< vector<int> > graph(V, vector<int>(V, INF));
 
     // Initializing the graph with example values
     graph[0][0] = 0;
@@ -67,10 +69,10 @@ int main() {
         3 6 0 1 
         2 5 7 0 
     */
-    std::cout << "Input graph matrix:" << std::endl;
+    cout << "Input graph matrix:" << endl;
     printMatrix(graph);
 
-    std::cout << "\nShortest distances between every pair of vertices:" << std::endl;
+    cout << "\nShortest distances between every pair of vertices:" << endl;
     floydWarshall(graph);
 
     return 0;
