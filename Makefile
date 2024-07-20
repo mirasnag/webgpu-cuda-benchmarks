@@ -1,5 +1,5 @@
 COMPILER = g++
-INPUT = src/utils/graph_generator.cpp
+INPUT = src/cpu/floyd_warshall_cpu.cpp
 OUTPUT = data/output/temp
 
 run: 
