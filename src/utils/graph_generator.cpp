@@ -8,7 +8,7 @@
 
 using namespace std;
 
-const int INF = numeric_limits<int>::max();
+const int INF = 1e9;
 
 vector< vector<int> > generateGraphFromText(const string &filename) {
     ifstream infile(filename);
@@ -40,13 +40,13 @@ vector< vector<int> > generateGraphFromText(const string &filename) {
     return graph;
 }
 
-vector< vector<int> > generateRandomGraph(int V){
+vector< vector<int> > generateRandomGraph(int V, double density){   // 0 <= density < 1
     srand(time(NULL));
     vector< vector<int> > graph(V, vector<int> (V));
     for(int i=0;i<V;i++){
         for(int j=0;j<V;j++){
-            int weight = rand()%150;
-            if(weight > 100) graph[i][j] = INF;
+            int weight = rand()%INF;
+            if(weight > INF*density) graph[i][j] = INF;
             else graph[i][j] = weight;
         }
     }
@@ -55,7 +55,7 @@ vector< vector<int> > generateRandomGraph(int V){
 
 int main(){
     cout << "Generating Random Graph:\n";
-    vector< vector<int> > randGraph = generateRandomGraph(4);
+    vector< vector<int> > randGraph = generateRandomGraph(4, 0.75);
     for(int i=0;i<4;i++){
         for(int j=0;j<4;j++){
             if (randGraph[i][j] == INF) {

@@ -1,9 +1,10 @@
-COMPILER = g++
-INPUT = src/cpu/floyd_warshall_cpu.cpp
+GPP = g++
+# INPUT = src/cpu/floyd_warshall_cpu.cpp
+INPUT = src/utils/graph_generator.cpp
 OUTPUT = data/output/temp
 
 run: 
-	$(COMPILER) -o $(OUTPUT) $(INPUT); ./$(OUTPUT)
+	$(GPP) -o $(OUTPUT) $(INPUT); ./$(OUTPUT)
 
 clean: 
 	rm -f $(OUTPUT)

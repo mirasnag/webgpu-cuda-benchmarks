@@ -22,53 +22,43 @@ async function createBuffer(device, data, usage) {
 }
 
 const shaderCode = `
-@group(0) @binding(0) var<storage, read_write> dist : array<array<f32, 4>, 4>;
+@group(0) @binding(0) var<storage, read_write> dist : array<f32>;
 @group(0) @binding(1) var<uniform> kUniform : u32;
+@group(0) @binding(2) var<uniform> sizeUniform : u32;
 
 const INF: f32 = 1e9;
 
-@compute @workgroup_size(4, 4)
+@compute @workgroup_size(8, 8)
 fn main(@builtin(global_invocation_id) global_id : vec3<u32>) {
   let i : u32 = global_id.x;
   let j : u32 = global_id.y;
   let k : u32 = kUniform;
+  let size : u32 = sizeUniform;
 
-  if(dist[i][k] > INF){
+  if (i >= size || j >= size) {
     return;
   }
-  if(dist[k][j] > INF){
+
+  let ij : u32 = i * size + j;
+  let ik : u32 = i * size + k;
+  let kj : u32 = k * size + j;
+
+  if (dist[ik] >= INF || dist[kj] >= INF) {
     return;
   }
-  if ((dist[i][j] >= INF || dist[i][j] > dist[i][k] + dist[k][j])) {
-      dist[i][j] = dist[i][k] + dist[k][j];
+  if (dist[ij] >= INF || dist[ij] > dist[ik] + dist[kj]) {
+    dist[ij] = dist[ik] + dist[kj];
   }
 }
 `;
 
-async function runFloydWarshall() {
+async function runFloydWarshall(matrix) {
+  const size = Math.sqrt(matrix.length);
   const device = await initWebGPU();
 
-  // Example distance matrix (4x4)
-  const distMatrix = new Float32Array([
-    0,
-    3,
-    Infinity,
-    7,
-    8,
-    0,
-    2,
-    Infinity,
-    5,
-    Infinity,
-    0,
-    1,
-    2,
-    Infinity,
-    Infinity,
-    0,
-  ]);
-
+  const distMatrix = new Float32Array(matrix);
   const bufferSize = distMatrix.byteLength;
+
   const distBuffer = await createBuffer(
     device,
     distMatrix,
@@ -90,6 +80,13 @@ async function runFloydWarshall() {
     usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
   });
 
+  const sizeUniformBuffer = device.createBuffer({
+    size: 4, // size of u32
+    usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+  });
+
+  device.queue.writeBuffer(sizeUniformBuffer, 0, new Uint32Array([size]));
+
   const bindGroupLayout = pipeline.getBindGroupLayout(0);
   const bindGroup = device.createBindGroup({
     layout: bindGroupLayout,
@@ -106,17 +103,24 @@ async function runFloydWarshall() {
           buffer: kUniformBuffer,
         },
       },
+      {
+        binding: 2,
+        resource: {
+          buffer: sizeUniformBuffer,
+        },
+      },
     ],
   });
 
-  for (let k = 0; k < 4; k++) {
+  for (let k = 0; k < size; k++) {
     device.queue.writeBuffer(kUniformBuffer, 0, new Uint32Array([k]));
 
     const commandEncoder = device.createCommandEncoder();
     const passEncoder = commandEncoder.beginComputePass();
     passEncoder.setPipeline(pipeline);
     passEncoder.setBindGroup(0, bindGroup);
-    passEncoder.dispatchWorkgroups(4, 4); // 4x4 workgroups
+    const workgroupCount = Math.ceil(size / 8);
+    passEncoder.dispatchWorkgroups(workgroupCount, workgroupCount);
     passEncoder.end();
 
     device.queue.submit([commandEncoder.finish()]);
@@ -136,8 +140,26 @@ async function runFloydWarshall() {
   await readBuffer.mapAsync(GPUMapMode.READ);
   const result = new Float32Array(readBuffer.getMappedRange());
   console.log("Result:", result);
-
-  // readBuffer.unmap();
 }
 
-runFloydWarshall();
+// Example usage:
+const matrix = [
+  0,
+  3,
+  Infinity,
+  7,
+  8,
+  0,
+  2,
+  Infinity,
+  5,
+  Infinity,
+  0,
+  1,
+  2,
+  Infinity,
+  Infinity,
+  0,
+];
+
+runFloydWarshall(matrix);
