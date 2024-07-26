@@ -45,6 +45,10 @@ vector< vector<int> > generateRandomGraph(int V, double density){   // 0 <= dens
     vector< vector<int> > graph(V, vector<int> (V));
     for(int i=0;i<V;i++){
         for(int j=0;j<V;j++){
+            if(i == j){
+                graph[i][j] = 0;
+                continue;
+            }
             int weight = rand()%INF;
             if(weight > INF*density) graph[i][j] = INF;
             else graph[i][j] = weight;

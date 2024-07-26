@@ -28,6 +28,10 @@ function generateRandomGraph(V, density) {
 
   for (let i = 0; i < V; i++) {
     for (let j = 0; j < V; j++) {
+      if (i == j) {
+        graph[i][j] = 0;
+        continue;
+      }
       const weight = Math.floor(Math.random() * INF);
       graph[i][j] = weight > INF * density ? INF : weight;
     }
