@@ -53,20 +53,25 @@ vector< vector<int> > generateRandomGraph(int V, double density){   // 0 <= dens
     return graph;
 }
 
+void printMatrix(const vector< vector<int> >& dist) {
+    int V = dist.size();
+    for (int i = 0; i < V; ++i) {
+        for (int j = 0; j < V; ++j) {
+            if (dist[i][j] == INF)
+                cout << "INF ";
+            else
+                cout << dist[i][j] << " ";
+        }
+        cout << endl;
+    }
+}
+
 int main(){
     cout << "Generating Random Graph:\n";
     vector< vector<int> > randGraph = generateRandomGraph(4, 0.75);
-    for(int i=0;i<4;i++){
-        for(int j=0;j<4;j++){
-            if (randGraph[i][j] == INF) {
-                cout << "INF ";
-            } else {
-                cout << randGraph[i][j] << " ";
-            }
-        }
-        cout << "\n";
-    }
-    cout << "--------\n";
+    printMatrix(randGraph);
+
+    cout << "\n";
 
     cout << "Generating Graph from Text File:\n";
     string filename = "data/input/4x4.txt";
@@ -77,16 +82,6 @@ int main(){
         return 1;
     }
 
-    for(int i=0;i<4;i++){
-        for(int j=0;j<4;j++){
-            if (textGraph[i][j] == INF) {
-                cout << "INF ";
-            } else {
-                cout << textGraph[i][j] << " ";
-            }
-        }
-        cout << "\n";
-    }
-    cout << "--------\n";
+    printMatrix(textGraph);
     return 0;
 }
